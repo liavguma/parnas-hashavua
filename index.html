@@ -26,18 +26,18 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .ios-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; backdrop-filter: blur(10px); }
         .modal-content { position: absolute; bottom: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; padding-bottom: calc(env(safe-area-inset-bottom) + 50px); }
         
         input, select, textarea { width: 100%; border: 1px solid #ddd; padding: 14px; border-radius: 12px; background: #f9f9f9; margin-bottom: 12px; font-size: 16px; outline: none; }
         input:focus, select:focus, textarea:focus { border-color: var(--ios-blue); background: white; }
         .btn-primary { background: var(--ios-blue); color: white; padding: 16px; border-radius: 14px; font-weight: bold; width: 100%; transition: opacity 0.2s; }
         .btn-primary:active { opacity: 0.7; }
-        .btn-primary:disabled { opacity: 0.5; }
         
-        nav { padding-bottom: env(safe-area-inset-bottom); }
-
-        /* עיצוב מסך טלוויזיה וגלילה אוטומטית */
+        /* מסך נעילה / התחברות */
+        #authScreen { display: flex; position: fixed; inset: 0; background: var(--ios-bg); z-index: 300; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
+        
+        /* עיצוב טלוויזיה */
         #tvScreen { display: none; position: fixed; inset: 0; background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%); z-index: 200; color: white; overflow: hidden; }
         .tv-scroll-container { height: calc(100vh - 130px); overflow: hidden; position: relative; }
         .tv-scroll-track { display: flex; flex-direction: column; gap: 32px; padding: 40px 80px; animation: scrollUp 28s linear infinite; }
@@ -51,6 +51,21 @@
 </head>
 <body>
 
+    <!-- מסך התחברות (PIN Code) -->
+    <div id="authScreen">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-1">כניסה למערכת</h2>
+            <p class="text-xs text-gray-400 mb-6">הזן את קוד ה-PIN לניהול הברכות</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="password" id="pinInput" placeholder="קוד PIN (לדוגמה: 1234)" class="text-center tracking-widest text-lg font-bold" required>
+                <button type="submit" class="btn-primary mt-2">כניסה למערכת</button>
+            </form>
+        </div>
+    </div>
+
     <!-- כותרת עליונה -->
     <header class="bg-white/80 sticky top-0 z-50 border-b px-5">
         <div class="safe-top flex justify-between items-center">
@@ -59,11 +74,11 @@
                 <span id="syncLoader" class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-bold hidden">מסנכרן...</span>
             </div>
             <div class="flex items-center gap-2">
+                <button onclick="logout()" class="text-gray-400 p-2 rounded-full active:scale-90 transition" title="התנתק ממכשיר זה">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
                 <button onclick="fetchFromSheet()" class="text-gray-500 p-2 rounded-full active:scale-90 transition" title="רענן נתונים">
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                </button>
-                <button onclick="openModal('settings')" class="text-gray-500 p-2 rounded-full active:scale-90 transition" title="הגדרות חיבור">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
                 </button>
                 <button onclick="openNewBlessingModal()" class="bg-blue-600 text-white p-2 rounded-full shadow-lg active:scale-90 transition mr-1">
                     <i data-lucide="plus" class="w-6 h-6"></i>
@@ -74,7 +89,6 @@
 
     <!-- תוכן ראשי -->
     <main class="p-4">
-        <!-- טאב 1: ברכות השבוע (פעילות) -->
         <section id="activeTab" class="tab-content active">
             <div class="flex flex-col gap-2 mb-4">
                 <div class="flex gap-2">
@@ -92,7 +106,6 @@
             <div id="activeList"></div>
         </section>
 
-        <!-- טאב 2: ארכיון ברכות -->
         <section id="archiveTab" class="tab-content">
             <div class="bg-blue-50 border border-blue-100 text-blue-800 text-xs p-3 rounded-xl mb-3 leading-relaxed">
                 כל ברכה חדשה נשמרת אוטומטית בארכיון. לחץ על <strong>"שכפל"</strong> כדי להציג שוב ברכה מהעבר עם תאריך מעודכן.
@@ -102,7 +115,7 @@
         </section>
     </main>
 
-    <!-- תפריט תחתון בסגנון iOS -->
+    <!-- תפריט תחתון -->
     <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t flex justify-around py-4 pb-8 z-50 text-gray-400">
         <button onclick="switchTab('activeTab')" id="btn-activeTab" class="text-blue-600 flex flex-col items-center">
             <i data-lucide="calendar-check"></i>
@@ -118,7 +131,7 @@
         </button>
     </nav>
 
-    <!-- מודאל הוספת / עריכת / שכפול ברכה -->
+    <!-- מודאל הוספה / עריכה -->
     <div id="blessingModal" class="modal" onclick="closeModalOnBackdrop(event)">
         <div class="modal-content">
             <h2 id="modalTitle" class="text-xl font-bold mb-4 border-b pb-2 text-center">הוספת ברכה חדשה</h2>
@@ -157,20 +170,7 @@
         </div>
     </div>
 
-    <!-- מודאל הגדרת כתובת Google Sheet API -->
-    <div id="settingsModal" class="modal" onclick="closeModalOnBackdrop(event)">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-center">חיבור ל-Google Sheets</h2>
-            <p class="text-xs text-gray-500 mb-3 leading-relaxed">
-                כתובת ה-Web App URL של ה-Google Sheet מחוברת ומוגדרת. ניתן לעדכן כאן במידת הצורך:
-            </p>
-            <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
-            <button onclick="saveSettings()" class="btn-primary">שמור וסנכרן</button>
-            <button onclick="closeAllModals()" class="w-full py-3 text-gray-400 font-bold">סגור</button>
-        </div>
-    </div>
-
-    <!-- מסך תצוגת טלוויזיה (TV Mode) -->
+    <!-- מסך טלוויזיה -->
     <div id="tvScreen">
         <div class="px-10 py-6 border-b border-amber-500/30 flex justify-between items-center bg-slate-900/90">
             <div>
@@ -190,36 +190,39 @@
     </div>
 
     <script>
-        // =========================================================================
-        // הקישור שלך מוטמע כאן:
-        const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjFRGHebvgoeav22kvDmcjaQwywOOcTzYoPeXVbtDBuKuNMWt5xiCl1uZyBCtLRHqP/exec"; 
-        // =========================================================================
-
+        // הקישור החדש שלך מעודכן כאן:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqyMCmJfIn34S5vIqyKt4ZBbYSC1OHIFWPrQSsveGvJL6AsK4HMZW08n3dBB75FtSH/exec";
         let dbData = { active: [], archive: [] };
         let tvInterval = null;
 
-        function getApiUrl() {
-            return localStorage.getItem('parnas_script_url') || DEFAULT_SCRIPT_URL;
-        }
-
-        async function init() {
+        function init() {
             lucide.createIcons();
-            document.getElementById('scriptUrlInput').value = getApiUrl();
-
-            // טעינת גיבוי מקומי מהיר עד שהרשת מגיבה
-            const cached = localStorage.getItem('parnas_cache');
-            if (cached) {
-                dbData = JSON.parse(cached);
-                renderActive();
-                renderArchive();
+            
+            const savedPin = localStorage.getItem('parnas_user_pin');
+            if (savedPin) {
+                document.getElementById('authScreen').style.display = 'none';
             }
 
-            await fetchFromSheet();
+            fetchFromSheet();
 
-            // אם נכנסו עם ?mode=tv בכתובת (למשל בטלוויזיה)
             if (window.location.search.includes('mode=tv')) {
+                document.getElementById('authScreen').style.display = 'none';
                 openTvMode();
             }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('pinInput').value.trim();
+            if (pin) {
+                localStorage.setItem('parnas_user_pin', pin);
+                document.getElementById('authScreen').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('parnas_user_pin');
+            location.reload();
         }
 
         function setLoading(isLoading) {
@@ -227,21 +230,11 @@
         }
 
         async function fetchFromSheet() {
-            const url = getApiUrl();
-            if (!url) {
-                renderActive();
-                renderArchive();
-                return;
-            }
             setLoading(true);
             try {
-                const res = await fetch(url);
+                const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
-                dbData = {
-                    active: data.active || [],
-                    archive: data.archive || []
-                };
-                localStorage.setItem('parnas_cache', JSON.stringify(dbData));
+                dbData = { active: data.active || [], archive: data.archive || [] };
                 renderActive();
                 renderArchive();
                 if (document.getElementById('tvScreen').style.display === 'block') {
@@ -255,18 +248,20 @@
         }
 
         async function sendToSheet(payload) {
-            const url = getApiUrl();
-            if (!url) {
-                alert("טרם הוגדר קישור ל-Google Sheet! לחץ על סמל גלגל השיניים למעלה.");
-                return false;
-            }
+            payload.pin = localStorage.getItem('parnas_user_pin');
             setLoading(true);
             try {
-                await fetch(url, {
+                const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
+                const result = await res.json();
+                if (result.status === "error") {
+                    alert("שגיאה: קוד ה-PIN שגוי!");
+                    setLoading(false);
+                    return false;
+                }
                 await fetchFromSheet();
                 return true;
             } catch (err) {
@@ -416,20 +411,12 @@
             }
         }
 
-        function saveSettings() {
-            const val = document.getElementById('scriptUrlInput').value.trim();
-            localStorage.setItem('parnas_script_url', val);
-            closeAllModals();
-            fetchFromSheet();
-        }
-
         function renderTvCards() {
             const today = new Date().toISOString().slice(0, 10);
             document.getElementById('tvDateDisplay').innerText = new Date().toLocaleDateString('he-IL', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
 
-            // בטלוויזיה נציג ברכות שהתאריך שלהן תקף להיום (ואם אין כאלו, נציג את כל הפעילות)
             let validItems = dbData.active.filter(item => today >= item.startDate && today <= item.endDate);
             if (validItems.length === 0) validItems = dbData.active;
 
@@ -445,7 +432,6 @@
         function openTvMode() {
             document.getElementById('tvScreen').style.display = 'block';
             renderTvCards();
-            // רענון אוטומטי מהאקסל כל 3 דקות כשהטלוויזיה דולקת
             if (!tvInterval) {
                 tvInterval = setInterval(fetchFromSheet, 180000);
             }
