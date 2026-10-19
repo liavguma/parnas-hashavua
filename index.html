@@ -58,9 +58,9 @@
                 <i data-lucide="lock" class="w-8 h-8"></i>
             </div>
             <h2 class="text-xl font-bold mb-1">כניסה למערכת</h2>
-            <p class="text-xs text-gray-400 mb-6">הזן את קוד ה-PIN לניהול הברכות</p>
+            <p class="text-xs text-gray-400 mb-6">הזן את קוד ה-PIN לצפייה וניהול הברכות</p>
             <form onsubmit="handleLogin(event)">
-                <input type="password" id="pinInput" placeholder="קוד PIN (לדוגמה: 1234)" class="text-center tracking-widest text-lg font-bold" required>
+                <input type="password" id="pinInput" placeholder="קוד PIN (מספרים או אותיות)" class="text-center tracking-widest text-lg font-bold" required>
                 <button type="submit" class="btn-primary mt-2">כניסה למערכת</button>
             </form>
         </div>
@@ -190,8 +190,8 @@
     </div>
 
     <script>
-        // הקישור החדש שלך מעודכן כאן:
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqyMCmJfIn34S5vIqyKt4ZBbYSC1OHIFWPrQSsveGvJL6AsK4HMZW08n3dBB75FtSH/exec";
+        // הכתובת החדשה שלך מעודכנת כאן:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM1U8Izomt9S0Y_L1cZGxqvvdpwptz8tP16Sg86BkLWvsCVFMI1nypN4Lrfl5vUoVV/exec";
         let dbData = { active: [], archive: [] };
         let tvInterval = null;
 
@@ -201,13 +201,16 @@
             const savedPin = localStorage.getItem('parnas_user_pin');
             if (savedPin) {
                 document.getElementById('authScreen').style.display = 'none';
+                fetchFromSheet();
             }
 
-            fetchFromSheet();
-
             if (window.location.search.includes('mode=tv')) {
-                document.getElementById('authScreen').style.display = 'none';
-                openTvMode();
+                if (savedPin) {
+                    document.getElementById('authScreen').style.display = 'none';
+                    openTvMode();
+                } else {
+                    document.getElementById('authScreen').style.display = 'flex';
+                }
             }
         }
 
@@ -217,6 +220,10 @@
             if (pin) {
                 localStorage.setItem('parnas_user_pin', pin);
                 document.getElementById('authScreen').style.display = 'none';
+                fetchFromSheet();
+                if (window.location.search.includes('mode=tv')) {
+                    openTvMode();
+                }
             }
         }
 
@@ -230,10 +237,20 @@
         }
 
         async function fetchFromSheet() {
+            const pin = localStorage.getItem('parnas_user_pin');
+            if (!pin) return;
+
             setLoading(true);
             try {
-                const res = await fetch(SCRIPT_URL);
+                const res = await fetch(`${SCRIPT_URL}?pin=${encodeURIComponent(pin)}`);
                 const data = await res.json();
+                
+                if (data.status === "error") {
+                    alert("קוד ה-PIN שגוי!");
+                    logout();
+                    return;
+                }
+
                 dbData = { active: data.active || [], archive: data.archive || [] };
                 renderActive();
                 renderArchive();
@@ -259,6 +276,7 @@
                 const result = await res.json();
                 if (result.status === "error") {
                     alert("שגיאה: קוד ה-PIN שגוי!");
+                    logout();
                     setLoading(false);
                     return false;
                 }
@@ -380,7 +398,7 @@
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
             btn.disabled = true;
-            btn.innerText = "שומר ב-Google Sheets...";
+            btn.innerText = "שמור ב-Google Sheets...";
 
             const editId = document.getElementById('editId').value;
             const payload = {
