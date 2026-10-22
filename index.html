@@ -9,10 +9,20 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ייבוא גופנים מסורתיים בסגנון סת"ם / ספרי קודש לטלוויזיה בלבד -->
+    <link href="https://fonts.googleapis.com/css2?family=Bellefair&family=David+Libre:wght@500;700&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/stam-ashkenaz-clm" rel="stylesheet">
     <style>
         :root { --ios-bg: #F2F2F7; --ios-blue: #007AFF; }
         body { background-color: var(--ios-bg); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0; min-height: 100vh; }
         
+        /* גופן סת"ם / כתב תורה מיוחד שמוחל רק על מסך הטלוויזיה */
+        .torah-font { 
+            font-family: 'Stam Ashkenaz CLM', 'David Libre', 'Frank Ruhl Libre', serif; 
+            letter-spacing: 0.03em;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+        }
+
         header {
             padding-top: env(safe-area-inset-top); 
             background-color: rgba(255, 255, 255, 0.85);
@@ -25,7 +35,9 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* עיצוב מקורי חלק ולבן ללשוניות ברכות השבוע והארכיון */
         .ios-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; backdrop-filter: blur(10px); }
         .modal-content { position: absolute; bottom: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; padding-bottom: calc(env(safe-area-inset-bottom) + 50px); }
         
@@ -37,16 +49,79 @@
         /* מסך נעילה / התחברות */
         #authScreen { display: flex; position: fixed; inset: 0; background: var(--ios-bg); z-index: 300; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
         
-        /* עיצוב טלוויזיה */
+        /* עיצוב מסך טלוויזיה מקורי */
         #tvScreen { display: none; position: fixed; inset: 0; background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%); z-index: 200; color: white; overflow: hidden; }
         .tv-scroll-container { height: calc(100vh - 130px); overflow: hidden; position: relative; }
-        .tv-scroll-track { display: flex; flex-direction: column; gap: 32px; padding: 40px 80px; animation: scrollUp 28s linear infinite; }
+        .tv-scroll-track { display: flex; flex-direction: column; gap: 40px; padding: 40px 100px; animation: scrollUp 28s linear infinite; max-width: 1400px; margin: 0 auto; }
         .tv-scroll-track:hover { animation-play-state: paused; }
         @keyframes scrollUp {
             0% { transform: translateY(90vh); }
             100% { transform: translateY(-100%); }
         }
-        .tv-card { background: rgba(255, 255, 255, 0.06); border: 2px solid rgba(251, 191, 36, 0.35); border-radius: 28px; padding: 40px; backdrop-filter: blur(12px); text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+
+        /* עיצוב הקוביות בטלוויזיה בלבד - סגנון שער היכל בית כנסת עם עמודים */
+        .tv-card {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 3px solid #d4af37;
+            border-radius: 24px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 0 25px rgba(212, 175, 55, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* גוף הקובייה עם 2 עמודי זהב בצדדים וקשת במרכז */
+        .tv-card-body {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* עמודי זהב בתוך הקובייה */
+        .tv-card-pillar {
+            width: 52px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #c59b27;
+            background-image: 
+                linear-gradient(90deg, rgba(80,55,0,0.65) 0%, rgba(255,255,255,0.4) 35%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.4) 65%, rgba(80,55,0,0.65) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(90, 62, 0, 0.35) 10px, rgba(90, 62, 0, 0.35) 13px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(90, 62, 0, 0.35) 10px, rgba(90, 62, 0, 0.35) 13px);
+            border-left: 2px solid #8b6508;
+            border-right: 2px solid #8b6508;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+        }
+
+        .tv-card-pillar::before, .tv-card-pillar::after {
+            content: "❖";
+            height: 24px;
+            background: linear-gradient(90deg, #7a5805 0%, #d4af37 50%, #7a5805 100%);
+            color: #4a3500;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid #fff3b0;
+            border-bottom: 1px solid #5a4000;
+        }
+        .tv-card-pillar::after {
+            margin-top: auto;
+        }
+
+        /* התוכן הפנימי הקשתי של הקובייה */
+        .tv-card-content {
+            flex: 1;
+            margin: 14px 18px;
+            padding: 28px 36px;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08) 0%, rgba(15, 23, 42, 0.85) 100%);
+            border: 2px solid rgba(212, 175, 55, 0.6);
+            border-radius: 90px 90px 16px 16px;
+            text-align: center;
+            box-shadow: inset 0 6px 20px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -91,17 +166,8 @@
     <main class="p-4">
         <section id="activeTab" class="tab-content active">
             <div class="flex flex-col gap-2 mb-4">
-                <div class="flex gap-2">
-                    <select id="typeFilter" onchange="renderActive()" class="flex-1 shadow-sm text-sm !mb-0">
-                        <option value="all">כל סוגי הברכות</option>
-                        <option value="לרפואה שלמה">לרפואה שלמה</option>
-                        <option value="להצלחה וברכה">להצלחה וברכה</option>
-                        <option value="לעילוי נשמת">לעילוי נשמת</option>
-                        <option value="לזיווג הגון">לזיווג הגון</option>
-                    </select>
-                    <input type="date" id="dateFilter" onchange="renderActive()" class="flex-1 shadow-sm text-sm !mb-0">
-                </div>
-                <input type="text" id="activeSearch" oninput="renderActive()" placeholder="חיפוש חופשי (שם תורם / תוכן הברכה...)" class="shadow-sm !mb-0">
+                <input type="date" id="dateFilter" onchange="renderActive()" class="shadow-sm text-sm !mb-0">
+                <input type="text" id="activeSearch" oninput="renderActive()" placeholder="חיפוש חופשי (שם משפחה / תוכן הברכה...)" class="shadow-sm !mb-0">
             </div>
             <div id="activeList"></div>
         </section>
@@ -142,14 +208,6 @@
                 <label class="text-xs text-gray-500 px-1 font-bold">שם התורם / המשפחה</label>
                 <input type="text" id="donorName" placeholder="לדוגמה: משפחת כהן" required>
 
-                <label class="text-xs text-gray-500 px-1 font-bold">סוג ההקדשה</label>
-                <select id="blessingType" required>
-                    <option value="לרפואה שלמה">לרפואה שלמה</option>
-                    <option value="להצלחה וברכה">להצלחה וברכה</option>
-                    <option value="לעילוי נשמת">לעילוי נשמת</option>
-                    <option value="לזיווג הגון">לזיווג הגון</option>
-                </select>
-
                 <label class="text-xs text-gray-500 px-1 font-bold">שמות המתברכים / נוסח הברכה</label>
                 <textarea id="blessingText" rows="3" placeholder="הזן את השמות או את נוסח הברכה..." required></textarea>
 
@@ -170,16 +228,24 @@
         </div>
     </div>
 
-    <!-- מסך טלוויזיה -->
-    <div id="tvScreen">
+    <!-- מסך טלוויזיה עם גופן סת"ם תורני וכפתור מסך מלא -->
+    <div id="tvScreen" class="torah-font">
         <div class="px-10 py-6 border-b border-amber-500/30 flex justify-between items-center bg-slate-900/90">
             <div>
-                <h1 class="text-5xl font-black text-amber-400 tracking-wide">פרנס השבוע</h1>
-                <p class="text-slate-300 text-xl mt-1">ברכות והקדשות קהילת בית הכנסת</p>
+                <h1 class="text-6xl font-black text-amber-400 tracking-wide">פרנס השבוע</h1>
+                <p class="text-slate-300 text-2xl mt-1">כולל "מדרש ראובן"</p>
             </div>
-            <div class="flex items-center gap-4">
-                <span id="tvDateDisplay" class="text-amber-200/80 text-lg font-bold"></span>
-                <button onclick="closeTvMode()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm">
+            <div class="flex items-center gap-3">
+                <span id="tvDateDisplay" class="text-amber-300 text-3xl font-bold bg-amber-500/10 border border-amber-500/30 px-5 py-2.5 rounded-2xl">טוען תאריך עברי ופרשה...</span>
+                
+                <!-- כפתור מסך מלא -->
+                <button onclick="toggleFullScreen()" id="fullscreenBtn" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-4 py-2.5 rounded-xl text-base font-sans font-bold flex items-center gap-2 transition">
+                    <i data-lucide="maximize" id="fullscreenIcon" class="w-5 h-5"></i>
+                    <span id="fullscreenText">מסך מלא</span>
+                </button>
+
+                <!-- כפתור יציאה -->
+                <button onclick="closeTvMode()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-base font-sans font-bold transition">
                     יציאה ✕
                 </button>
             </div>
@@ -190,13 +256,13 @@
     </div>
 
     <script>
-        // הכתובת החדשה שלך מעודכנת כאן:
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM1U8Izomt9S0Y_L1cZGxqvvdpwptz8tP16Sg86BkLWvsCVFMI1nypN4Lrfl5vUoVV/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5ovUkLZAK9NkuXIDz6Jt6mprcAJ4FrZIEaChK4B__HmK_untmfTuAyqK8aX_Z9fTX/exec";
         let dbData = { active: [], archive: [] };
         let tvInterval = null;
 
         function init() {
             lucide.createIcons();
+            updateHebrewDateAndParasha();
             
             const savedPin = localStorage.getItem('parnas_user_pin');
             if (savedPin) {
@@ -211,6 +277,121 @@
                 } else {
                     document.getElementById('authScreen').style.display = 'flex';
                 }
+            }
+        }
+
+        // הפעלה וכיבוי של מצב מסך מלא בטלוויזיה
+        function toggleFullScreen() {
+            const tvElem = document.getElementById('tvScreen');
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (tvElem.requestFullscreen) {
+                    tvElem.requestFullscreen();
+                } else if (tvElem.webkitRequestFullscreen) {
+                    tvElem.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        // עדכון כפתור מסך מלא כאשר המצב משתנה
+        function updateFullscreenButton() {
+            const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            const textEl = document.getElementById('fullscreenText');
+            const iconEl = document.getElementById('fullscreenIcon');
+            if (textEl && iconEl) {
+                textEl.innerText = isFull ? 'צא ממסך מלא' : 'מסך מלא';
+                iconEl.setAttribute('data-lucide', isFull ? 'minimize' : 'maximize');
+                lucide.createIcons();
+            }
+        }
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+
+        // פונקציית עזר לנירמול תאריך לפורמט YYYY-MM-DD
+        function formatDateOnly(val) {
+            if (!val) return "";
+            const str = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            if (str.includes('T')) return str.slice(0, 10);
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) {
+                return d.toISOString().slice(0, 10);
+            }
+            return str;
+        }
+
+        // פונקציה שמסדרת כל שורה לפי מבנה העמודות החדש:
+        // A: id | B: donorName | C: blessingText | D: startDate | E: endDate
+        function normalizeRow(item) {
+            if (Array.isArray(item)) {
+                return {
+                    id: item[0] ?? "",
+                    donorName: item[1] ?? "",
+                    blessingText: item[2] ?? "",
+                    startDate: formatDateOnly(item[3]),
+                    endDate: formatDateOnly(item[4])
+                };
+            }
+
+            const isShifted = ('blessingType' in item) && (item.endDate === "" || item.endDate === undefined || item.endDate === null);
+
+            if (isShifted) {
+                return {
+                    id: item.id ?? "",
+                    donorName: item.donorName ?? "",
+                    blessingText: item.blessingType ?? "",
+                    startDate: formatDateOnly(item.blessingText),
+                    endDate: formatDateOnly(item.startDate)
+                };
+            }
+
+            return {
+                id: item.id ?? "",
+                donorName: item.donorName ?? "",
+                blessingText: item.blessingText ?? "",
+                startDate: formatDateOnly(item.startDate),
+                endDate: formatDateOnly(item.endDate)
+            };
+        }
+
+        // שליפת יום בשבוע, תאריך עברי ופרשת השבוע ממאגר Hebcal האמין
+        async function updateHebrewDateAndParasha() {
+            const now = new Date();
+            const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            const nextWeek = new Date(now.getTime() + 7 * 86400000);
+            const endY = nextWeek.getFullYear();
+            const endM = String(nextWeek.getMonth() + 1).padStart(2, '0');
+            const endD = String(nextWeek.getDate()).padStart(2, '0');
+            const nextWeekStr = `${endY}-${endM}-${endD}`;
+
+            try {
+                const convRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${yyyy}&gm=${mm}&gd=${dd}&g2h=1`);
+                const convData = await convRes.json();
+                const hebrewDate = convData.hebrew || '';
+
+                const calRes = await fetch(`https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&i=on&start=${todayStr}&end=${nextWeekStr}`);
+                const calData = await calRes.json();
+                const parashaItem = (calData.items || []).find(item => item.category === 'parashat');
+                const parasha = parashaItem ? parashaItem.hebrew : '';
+
+                const parts = [weekday, hebrewDate, parasha].filter(Boolean);
+                document.getElementById('tvDateDisplay').innerText = parts.join(' • ');
+            } catch (err) {
+                console.error("שגיאה בטעינת לוח שנה עברי:", err);
+                const fallbackHebrew = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                }).format(now);
+                document.getElementById('tvDateDisplay').innerText = `${weekday} • ${fallbackHebrew}`;
             }
         }
 
@@ -251,11 +432,15 @@
                     return;
                 }
 
-                dbData = { active: data.active || [], archive: data.archive || [] };
+                dbData = { 
+                    active: (data.active || []).map(normalizeRow), 
+                    archive: (data.archive || []).map(normalizeRow) 
+                };
                 renderActive();
                 renderArchive();
                 if (document.getElementById('tvScreen').style.display === 'block') {
                     renderTvCards();
+                    updateHebrewDateAndParasha();
                 }
             } catch (err) {
                 console.error("שגיאה במשיכת נתונים:", err);
@@ -289,28 +474,27 @@
             }
         }
 
+        // לשונית ברכות השבוע בעיצוב הלבן והנקי המקורי
         function renderActive() {
             const search = document.getElementById('activeSearch').value.toLowerCase();
-            const typeFilter = document.getElementById('typeFilter').value;
             const dateFilter = document.getElementById('dateFilter').value;
 
             let list = dbData.active.filter(item => {
                 const matchSearch = (item.donorName || '').toLowerCase().includes(search) || 
                                     (item.blessingText || '').toLowerCase().includes(search);
-                const matchType = typeFilter === 'all' || item.blessingType === typeFilter;
                 const matchDate = !dateFilter || (dateFilter >= item.startDate && dateFilter <= item.endDate);
-                return matchSearch && matchType && matchDate;
+                return matchSearch && matchDate;
             });
 
             document.getElementById('activeList').innerHTML = list.map(item => `
                 <div class="ios-card flex justify-between items-start">
                     <div class="flex-1 pl-3" onclick="startEditBlessing('${item.id}')">
-                        <span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-0.5 rounded-md">${item.blessingType}</span>
-                        <div class="font-bold text-lg text-gray-900 mt-1">${item.blessingText}</div>
-                        <div class="text-xs text-gray-500 mt-1">נתרם ע"י: <strong>${item.donorName}</strong></div>
+                        <div class="font-bold text-lg text-gray-900">${item.donorName}</div>
+                        <div class="text-sm text-gray-600 mt-1">${item.blessingText}</div>
+                        ${(item.startDate || item.endDate) ? `
                         <div class="text-[11px] text-gray-400 mt-2 flex items-center gap-1">
                             <i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${item.startDate} עד ${item.endDate}
-                        </div>
+                        </div>` : ''}
                     </div>
                     <div class="flex flex-col gap-2">
                         <button onclick="startEditBlessing('${item.id}')" class="text-gray-400 p-1.5 active:scale-90">
@@ -325,6 +509,7 @@
             lucide.createIcons();
         }
 
+        // לשונית ארכיון בעיצוב הלבן והנקי המקורי
         function renderArchive() {
             const search = document.getElementById('archiveSearch').value.toLowerCase();
             let list = dbData.archive.filter(item => 
@@ -335,8 +520,12 @@
             document.getElementById('archiveList').innerHTML = list.map(item => `
                 <div class="ios-card flex justify-between items-center">
                     <div class="flex-1 pl-3">
-                        <div class="text-xs text-gray-400 font-bold">${item.donorName} • ${item.blessingType}</div>
-                        <div class="font-bold text-gray-800 text-sm mt-0.5">${item.blessingText}</div>
+                        <div class="font-bold text-gray-900 text-base">${item.donorName}</div>
+                        <div class="text-gray-600 text-sm mt-0.5">${item.blessingText}</div>
+                        ${(item.startDate || item.endDate) ? `
+                        <div class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${item.startDate} עד ${item.endDate}
+                        </div>` : ''}
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button onclick="reuseFromArchive('${item.id}')" class="bg-blue-50 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 active:bg-blue-100">
@@ -373,7 +562,6 @@
             document.getElementById('editId').value = item.id;
             document.getElementById('fromArchiveFlag').value = "true";
             document.getElementById('donorName').value = item.donorName;
-            document.getElementById('blessingType').value = item.blessingType;
             document.getElementById('blessingText').value = item.blessingText;
             document.getElementById('startDate').value = item.startDate;
             document.getElementById('endDate').value = item.endDate;
@@ -387,7 +575,6 @@
             document.getElementById('editId').value = "";
             document.getElementById('fromArchiveFlag').value = "true";
             document.getElementById('donorName').value = item.donorName;
-            document.getElementById('blessingType').value = item.blessingType;
             document.getElementById('blessingText').value = item.blessingText;
             setDefaultDates();
             document.getElementById('modalTitle').innerText = "שכפול מהארכיון (בחר תאריך חדש)";
@@ -405,7 +592,6 @@
                 action: editId ? "edit" : "add",
                 id: editId,
                 donorName: document.getElementById('donorName').value,
-                blessingType: document.getElementById('blessingType').value,
                 blessingText: document.getElementById('blessingText').value,
                 startDate: document.getElementById('startDate').value,
                 endDate: document.getElementById('endDate').value,
@@ -429,33 +615,43 @@
             }
         }
 
+        // קוביות הטלוויזיה בעיצוב בית כנסת מפואר ובכתב תורה / סת"ם
         function renderTvCards() {
             const today = new Date().toISOString().slice(0, 10);
-            document.getElementById('tvDateDisplay').innerText = new Date().toLocaleDateString('he-IL', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
-
             let validItems = dbData.active.filter(item => today >= item.startDate && today <= item.endDate);
             if (validItems.length === 0) validItems = dbData.active;
 
             document.getElementById('tvTrack').innerHTML = validItems.map(item => `
                 <div class="tv-card">
-                    <div class="text-amber-400 text-3xl font-bold mb-3">${item.blessingType}</div>
-                    <div class="text-5xl font-black text-white leading-tight my-4">${item.blessingText}</div>
-                    <div class="text-slate-300 text-2xl mt-4">נתרם ע"י: <span class="text-amber-300 font-bold">${item.donorName}</span></div>
+                    <div class="tv-card-body">
+                        <div class="tv-card-pillar"></div>
+                        <div class="tv-card-content torah-font">
+                            <!-- שם המשפחה בצבע צהוב בכתב תורה -->
+                            <div class="text-5xl font-bold text-yellow-400 mb-4">${item.donorName}</div>
+                            <!-- נוסח הברכה בצבע לבן בכתב תורה מתחת -->
+                            <div class="text-3xl text-white leading-relaxed">${item.blessingText}</div>
+                        </div>
+                        <div class="tv-card-pillar"></div>
+                    </div>
                 </div>
-            `).join('') || '<div class="text-center text-3xl text-slate-400 mt-20">אין ברכות פעילות להצגה כעת</div>';
+            `).join('') || '<div class="text-center text-4xl text-slate-400 mt-20 torah-font">אין ברכות פעילות להצגה כעת</div>';
         }
 
         function openTvMode() {
             document.getElementById('tvScreen').style.display = 'block';
+            updateHebrewDateAndParasha();
             renderTvCards();
+            lucide.createIcons();
             if (!tvInterval) {
                 tvInterval = setInterval(fetchFromSheet, 180000);
             }
         }
 
         function closeTvMode() {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
             document.getElementById('tvScreen').style.display = 'none';
             if (tvInterval) {
                 clearInterval(tvInterval);
